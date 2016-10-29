@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -26,7 +27,7 @@ func portOnly(hostport string) string {
 	return hostport[colon+len(":"):]
 }
 
-func (hp *httpProxy) Handle(connection *connection, request *http.Request) {
+func (hp *httpProxy) SetupOutgoing(connection *connection, request *http.Request) error {
 	// Connect to outgoing host and write request bytes.
 	request.RequestURI = ""
 
@@ -40,26 +41,14 @@ func (hp *httpProxy) Handle(connection *connection, request *http.Request) {
 	// Create our outgoing connection.
 	outgoingConn, err := net.Dial("tcp", host)
 	if err != nil {
-		fmt.Println("Error making outgoing request to", request.Host, err)
-		return
+		return errors.New(fmt.Sprint("Error making outgoing request to", request.Host, err))
 	}
 
 	connection.outgoing = outgoingConn
 	err = request.Write(connection.outgoing)
 	if err != nil {
-		fmt.Println("Error writing request from incoming->outgoing", request.Host, err)
-		return
+		return errors.New(fmt.Sprint("Error writing request from incoming->outgoing", request.Host, err))
 	}
 
-	// Spawn incoming->outgoing and outgoing->incoming streams.
-	signal := make(chan error)
-	go streamBytes(connection.incoming, connection.outgoing, signal)
-	go streamBytes(connection.outgoing, connection.incoming, signal)
-
-	// Wait for either stream to complete and finish.
-	err = <-signal
-	if err != nil {
-		fmt.Println("Error reading or writing data", request.Host, err)
-		return
-	}
+	return nil
 }
