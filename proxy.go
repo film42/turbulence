@@ -7,7 +7,7 @@ import (
 )
 
 type proxy interface {
-	Handle(*connection, *http.Request)
+	SetupOutgoing(*connection, *http.Request) error
 }
 
 func streamBytes(src net.Conn, dest net.Conn, signal chan error) {
