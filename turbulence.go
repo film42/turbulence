@@ -1,8 +1,10 @@
 package main
 
 import (
+	"flag"
 	"net"
 	"os"
+	"strconv"
 )
 
 func handleConnection(conn net.Conn) {
@@ -17,7 +19,7 @@ func acceptedConnsChannel(listener net.Listener) chan net.Conn {
 		for {
 			conn, err := listener.Accept()
 			if err != nil {
-				logger.Info.Println("Could not accept socket:", err)
+				logger.Warn.Println("Could not accept socket:", err)
 				continue
 			}
 
@@ -30,14 +32,19 @@ func acceptedConnsChannel(listener net.Listener) chan net.Conn {
 func main() {
 	InitLogger()
 
+	portPtr := flag.Int("port", 25000, "listen port")
+	flag.Parse()
+
 	logger.Info.Println("Prepare for takeoff...")
-	server, err := net.Listen("tcp", ":25000")
+
+	listenOn := ":" + strconv.Itoa(*portPtr)
+	server, err := net.Listen("tcp", listenOn)
 	if err != nil {
 		logger.Fatal.Println("Could not start server:", err)
 		os.Exit(1)
 	}
 
-	logger.Info.Println("Server started on :25000")
+	logger.Info.Println("Server started on", listenOn)
 
 	acceptedConnsChannel := acceptedConnsChannel(server)
 	for {
