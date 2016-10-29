@@ -1,9 +1,9 @@
 package main
 
 import (
+	"flag"
 	"net"
 	"os"
-	"flag"
 	"strconv"
 )
 
@@ -19,7 +19,7 @@ func acceptedConnsChannel(listener net.Listener) chan net.Conn {
 		for {
 			conn, err := listener.Accept()
 			if err != nil {
-				logger.Info.Println("Could not accept socket:", err)
+				logger.Warn.Println("Could not accept socket:", err)
 				continue
 			}
 

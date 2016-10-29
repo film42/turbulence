@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -23,12 +22,12 @@ func (c *connection) Handle() {
 	reader := bufio.NewReader(c.incoming)
 	request, err := http.ReadRequest(reader)
 	if err == io.EOF {
-		logger.Info.Println(c.id, "Incoming connection disconnected.")
+		logger.Warn.Println(c.id, "Incoming connection disconnected.")
 		return
 	}
 
 	if err != nil {
-		logger.Info.Println(c.id, "Could not parse or read request from incoming connection:", err)
+		logger.Warn.Println(c.id, "Could not parse or read request from incoming connection:", err)
 		return
 	}
 
@@ -42,7 +41,7 @@ func (c *connection) Handle() {
 
 	err = c.proxy.SetupOutgoing(c, request)
 	if err != nil {
-		fmt.Println(err)
+		logger.Warn.Println(c.id, err)
 		return
 	}
 
@@ -54,7 +53,7 @@ func (c *connection) Handle() {
 	// Wait for either stream to complete and finish.
 	err = <-signal
 	if err != nil {
-		logger.Info.Println(c.id, "Error reading or writing data", request.Host, err)
+		logger.Warn.Println(c.id, "Error reading or writing data", request.Host, err)
 		return
 	}
 }
