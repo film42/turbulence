@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net"
@@ -12,20 +14,25 @@ type connection struct {
 	incoming net.Conn
 	outgoing net.Conn
 	proxy    proxy
+	id       string
 }
 
 func (c *connection) Handle() {
+	logger.Info.Println(c.id, "Handling new connection.")
+
 	reader := bufio.NewReader(c.incoming)
 	request, err := http.ReadRequest(reader)
 	if err == io.EOF {
-		fmt.Println("Incoming connection disconnected.")
+		logger.Info.Println(c.id, "Incoming connection disconnected.")
 		return
 	}
 
 	if err != nil {
-		fmt.Println("Could not parse or read request from incoming connection:", err)
+		logger.Info.Println(c.id, "Could not parse or read request from incoming connection:", err)
 		return
 	}
+
+	logger.Info.Println(c.id, "Processing connection to:", request.Method, request.Host)
 
 	if request.Method == "CONNECT" {
 		c.proxy = &httpsProxy{}
@@ -47,7 +54,8 @@ func (c *connection) Handle() {
 	// Wait for either stream to complete and finish.
 	err = <-signal
 	if err != nil {
-		fmt.Println("Error reading or writing data", request.Host, err)
+		logger.Info.Println(c.id, "Error reading or writing data", request.Host, err)
+		return
 	}
 }
 
@@ -59,10 +67,21 @@ func (c *connection) Close() {
 	if c.outgoing != nil {
 		c.outgoing.Close()
 	}
+
+	logger.Info.Println(c.id, "Connection closed.")
+}
+
+func newConnectionId() string {
+	bytes := make([]byte, 3) // 6 characters long.
+	if _, err := rand.Read(bytes); err != nil {
+		return "[ERROR-MAKING-UUID]"
+	}
+	return "[" + hex.EncodeToString(bytes) + "]"
 }
 
 func NewConnection(incoming net.Conn) *connection {
 	return &connection{
+		id:       newConnectionId(),
 		incoming: incoming,
 	}
 }

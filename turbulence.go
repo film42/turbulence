@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"os"
 )
@@ -18,7 +17,7 @@ func acceptedConnsChannel(listener net.Listener) chan net.Conn {
 		for {
 			conn, err := listener.Accept()
 			if err != nil {
-				fmt.Println("Could not accept socket:", err)
+				logger.Info.Println("Could not accept socket:", err)
 				continue
 			}
 
@@ -29,14 +28,16 @@ func acceptedConnsChannel(listener net.Listener) chan net.Conn {
 }
 
 func main() {
-	fmt.Println("Prepare for takeoff...")
+	InitLogger()
+
+	logger.Info.Println("Prepare for takeoff...")
 	server, err := net.Listen("tcp", ":25000")
 	if err != nil {
-		fmt.Println("Could not start server:", err)
+		logger.Fatal.Println("Could not start server:", err)
 		os.Exit(1)
 	}
 
-	fmt.Println("Server started on :25000")
+	logger.Info.Println("Server started on :25000")
 
 	acceptedConnsChannel := acceptedConnsChannel(server)
 	for {
