@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 )
@@ -28,16 +27,10 @@ func (hp *httpsProxy) Handle(connection *connection, request *http.Request) {
 	}
 
 	// Spawn incoming->outgoing and outgoing->incoming streams.
-	signal := make(chan bool)
+	signal := make(chan error)
 	go streamBytes(connection.incoming, connection.outgoing, signal)
 	go streamBytes(connection.outgoing, connection.incoming, signal)
 
 	// Wait for either stream to complete and finish.
 	<-signal
-}
-
-func streamBytes(src net.Conn, dest net.Conn, signal chan bool) {
-	// Read until EOF or error.
-	io.Copy(dest, src)
-	signal <- true
 }
