@@ -11,6 +11,7 @@ type proxy interface {
 }
 
 func streamBytes(src net.Conn, dest net.Conn, signal chan error) {
-	_, err := io.Copy(dest, src)
+	buffer := make([]byte, 1024)
+	_, err := io.CopyBuffer(dest, src, buffer)
 	signal <- err
 }

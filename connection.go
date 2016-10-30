@@ -25,11 +25,12 @@ func (c *connection) Handle() {
 		logger.Warn.Println(c.id, "Incoming connection disconnected.")
 		return
 	}
-
 	if err != nil {
 		logger.Warn.Println(c.id, "Could not parse or read request from incoming connection:", err)
 		return
 	}
+
+	defer request.Body.Close()
 
 	logger.Info.Println(c.id, "Processing connection to:", request.Method, request.Host)
 
@@ -46,11 +47,11 @@ func (c *connection) Handle() {
 	}
 
 	// Spawn incoming->outgoing and outgoing->incoming streams.
-	signal := make(chan error)
+	signal := make(chan error, 1)
 	go streamBytes(c.incoming, c.outgoing, signal)
 	go streamBytes(c.outgoing, c.incoming, signal)
 
-	// Wait for either stream to complete and finish.
+	// Wait for either stream to complete and finish. The second will always be an error.
 	err = <-signal
 	if err != nil {
 		logger.Warn.Println(c.id, "Error reading or writing data", request.Host, err)
