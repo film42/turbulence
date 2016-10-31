@@ -4,16 +4,17 @@ import (
 	"bufio"
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
 )
 
 type connection struct {
+	id       string
 	incoming net.Conn
 	outgoing net.Conn
 	proxy    proxy
-	id       string
 }
 
 func (c *connection) Handle() {
@@ -74,14 +75,16 @@ func (c *connection) Close() {
 func newConnectionId() string {
 	bytes := make([]byte, 3) // 6 characters long.
 	if _, err := rand.Read(bytes); err != nil {
-		return "[ERROR-MAKING-UUID]"
+		return "[ERROR-MAKING-ID]"
 	}
 	return "[" + hex.EncodeToString(bytes) + "]"
 }
 
 func NewConnection(incoming net.Conn) *connection {
+	newId := fmt.Sprint(newConnectionId(), " [", incoming.RemoteAddr().String(), "]")
+
 	return &connection{
-		id:       newConnectionId(),
+		id:       newId,
 		incoming: incoming,
 	}
 }
