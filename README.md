@@ -20,14 +20,19 @@ $ docker run -p 25000:25000 -d film42/turbulence:latest
 
 ### Configuring
 
-Turbluence only allows the listen port to be configured:
+Turbluence only allows the listen port, proxy username, and proxy password to be configured:
 
 ```
---port int
-    listen port (default 25000)
+Usage of ./turbulence:
+  -password string
+        password for proxy authentication
+  -port int
+        listen port (default 25000)
+  -username string
+        username for proxy authentication
 ```
 
-Other massive proxies like Squid support authentication, whitelisting and custom headers, but Turbulence doesn't try to solve these problems. It's built to do as little as possible. If you _need_ authentication or the ability to modify headers, then you should use a different proxy, but if whitelisting is good enough, use `iptables` instead. Even if you use Squid's whitelisting, the proxy is still publicly accessible and will respond to proxy connections with an unauthorized error. If you're using a cloud provider like amazon or google, be sure to use their firewall tools.
+Turbulence supports basic authentication. Other massive proxies like Squid support complex authentication, whitelisting and custom headers, but Turbulence doesn't try to solve these other problems. It's built to do as little as possible. If you _need_ authentication or the ability to modify headers, then you should use a different proxy, but if whitelisting is good enough, use `iptables` instead. Even if you use Squid's whitelisting, the proxy is still publicly accessible and will respond to proxy connections with an unauthorized error. If you're using a cloud provider like amazon or google, be sure to use their firewall tools.
 
 ### Purpose
 
