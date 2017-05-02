@@ -28,6 +28,8 @@ Usage of ./turbulence:
         password for proxy authentication
   -port int
         listen port (default 25000)
+  -strip-proxy-headers
+        strip proxy headers from http requests (default true)
   -username string
         username for proxy authentication
 ```

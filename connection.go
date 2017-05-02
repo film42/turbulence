@@ -49,8 +49,15 @@ func (c *connection) Handle() {
 		request.Header.Del("Proxy-Authorization")
 	}
 
-	// Delete any other proxy related things
-	request.Header.Del("Proxy-Connection")
+	// Delete any other proxy related thing if enabled.
+	if StripProxyHeaders {
+		request.Header.Del("Forwarded")
+		request.Header.Del("Proxy-Connection")
+		request.Header.Del("Via")
+		request.Header.Del("X-Forwarded-For")
+		request.Header.Del("X-Forwarded-Host")
+		request.Header.Del("X-Forwarded-Proto")
+	}
 
 	logger.Info.Println(c.id, "Processing connection to:", request.Method, request.Host)
 

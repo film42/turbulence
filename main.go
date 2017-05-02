@@ -10,6 +10,7 @@ import (
 var AuthenticationRequired = false
 var Username = ""
 var Password = ""
+var StripProxyHeaders = true
 
 func handleConnection(conn net.Conn) {
 	connection := NewConnection(conn)
@@ -66,6 +67,7 @@ func main() {
 	portPtr := flag.Int("port", 25000, "listen port")
 	usernamePtr := flag.String("username", "", "username for proxy authentication")
 	passwordPtr := flag.String("password", "", "password for proxy authentication")
+	stripProxyHeadersPtr := flag.Bool("strip-proxy-headers", true, "strip proxy headers from http requests")
 	flag.Parse()
 
 	if !validCredentials(*usernamePtr, *passwordPtr) {
@@ -78,6 +80,8 @@ func main() {
 		Username = *usernamePtr
 		Password = *passwordPtr
 	}
+
+	StripProxyHeaders = *stripProxyHeadersPtr
 
 	logger.Info.Println("Prepare for takeoff...")
 	listenAndServe(*portPtr)
