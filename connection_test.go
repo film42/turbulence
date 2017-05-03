@@ -39,8 +39,11 @@ func basicHttpProxyRequest() string {
 	return "GET http://httpbin.org/headers HTTP/1.1\r\nHost: httpbin.org\r\n\r\n"
 }
 
-func TestInvalidCredentials(t *testing.T) {
+func TestMain(m *testing.M) {
 	InitLogger()
+}
+
+func TestInvalidCredentials(t *testing.T) {
 	setCredentials("test", "hello")
 	defer resetCredentials()
 
@@ -65,7 +68,6 @@ func TestInvalidCredentials(t *testing.T) {
 }
 
 func TestSampleProxy(t *testing.T) {
-	InitLogger()
 	server := createHttpServer(":9000", "testing 123", 200)
 	defer func() {
 		if err := server.Shutdown(nil); err != nil {
