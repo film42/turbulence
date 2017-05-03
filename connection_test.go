@@ -45,6 +45,7 @@ func TestInvalidCredentials(t *testing.T) {
 	defer resetCredentials()
 
 	incoming := NewMockConn()
+	defer incoming.CloseClient()
 	conn := NewConnection(incoming)
 
 	go func() {
@@ -73,7 +74,9 @@ func TestSampleProxy(t *testing.T) {
 	}()
 
 	incoming := NewMockConn()
+	defer incoming.CloseClient()
 	conn := NewConnection(incoming)
+
 	go func() {
 		conn.Handle()
 	}()

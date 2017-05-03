@@ -37,6 +37,16 @@ func (c MockConn) Close() error {
 	return nil
 }
 
+func (c MockConn) CloseClient() error {
+	if err := c.ClientWriter.Close(); err != nil {
+		return err
+	}
+	if err := c.ClientReader.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c MockConn) Read(data []byte) (n int, err error)  { return c.ServerReader.Read(data) }
 func (c MockConn) Write(data []byte) (n int, err error) { return c.ServerWriter.Write(data) }
 
