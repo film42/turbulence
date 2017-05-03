@@ -2,13 +2,31 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 	"testing"
 )
 
+func createHttpServer(address, payload string, code int) *http.Server {
+	server := &http.Server{Addr: address}
+
+	go func() {
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Date", "FAKE")
+			w.WriteHeader(code)
+			w.Write([]byte(payload))
+		})
+		if err := server.ListenAndServe(); err != nil {
+			fmt.Println("Error creating server:", err)
+		}
+	}()
+
+	return server
+}
+
 func resetCredentials() {
-	AuthenticationRequired = false
 	setCredentials("", "")
+	AuthenticationRequired = false
 }
 
 func setCredentials(user, pass string) {
@@ -18,34 +36,57 @@ func setCredentials(user, pass string) {
 }
 
 func basicHttpProxyRequest() string {
-	return "GET http://httpbin.org/headers HTTP/1.1\r\nHost: httpbin.org\r\nUser-Agent: curl/7.53.1\r\n\r\n"
+	return "GET http://httpbin.org/headers HTTP/1.1\r\nHost: httpbin.org\r\n\r\n"
 }
 
 func TestInvalidCredentials(t *testing.T) {
 	InitLogger()
 	setCredentials("test", "hello")
+	defer resetCredentials()
+
 	incoming := NewMockConn()
 	conn := NewConnection(incoming)
 
 	go func() {
-		fmt.Println("start reading")
 		conn.Handle()
-		fmt.Println("done reading")
 	}()
 
-	fmt.Println("start writing")
 	incoming.ClientWriter.Write([]byte(basicHttpProxyRequest()))
-	fmt.Println("done writing")
 
-	fmt.Println("start clinet reading")
 	buffer := make([]byte, 100)
 	incoming.ClientReader.Read(buffer)
-	fmt.Println("finish client reading")
 	response := strings.TrimRight(string(buffer), "\x000")
 
 	expected := "HTTP/1.0 407 Proxy authentication required\r\n\r\n"
 	if response != expected {
-		fmt.Println("Expected", expected, len(expected), "but found", response, len(response))
-		t.Fatal()
+		t.Fatalf("Expected '%s' but got '%s'", expected, response)
+	}
+}
+
+func TestSampleProxy(t *testing.T) {
+	InitLogger()
+	server := createHttpServer(":9000", "testing 123", 200)
+	defer func() {
+		if err := server.Shutdown(nil); err != nil {
+			panic(err)
+		}
+	}()
+
+	incoming := NewMockConn()
+	conn := NewConnection(incoming)
+	go func() {
+		conn.Handle()
+	}()
+
+	request := "GET http://localhost:9000/ HTTP/1.1\r\nHost: localhost\r\n\r\n"
+	incoming.ClientWriter.Write([]byte(request))
+
+	buffer := make([]byte, 1000)
+	incoming.ClientReader.Read(buffer)
+	response := strings.TrimRight(string(buffer), "\x000")
+	expected_response := "HTTP/1.1 200 OK\r\nDate: FAKE\r\nContent-Length: 11\r\nContent-Type: text/plain; charset=utf-8\r\n\r\ntesting 123"
+
+	if response != expected_response {
+		t.Fatalf("Expected '%s' but got '%s'", expected_response, response)
 	}
 }
