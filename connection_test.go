@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -17,7 +16,7 @@ func createHttpServer(address, payload string, code int) *http.Server {
 			w.Write([]byte(payload))
 		})
 		if err := server.ListenAndServe(); err != nil {
-			fmt.Println("Error creating server:", err)
+			panic(err)
 		}
 	}()
 
