@@ -37,7 +37,6 @@ func (c *connection) Handle() {
 
 	defer request.Body.Close()
 
-	// TODO: Make this return a 407
 	if AuthenticationRequired && !credentialsAreValid(request) {
 		logger.Fatal.Println(c.id, "Invalid credentials.")
 		c.incoming.Write([]byte(ProxyAuthenticationRequired))
