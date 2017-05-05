@@ -77,7 +77,7 @@ func TestInvalidCredentials(t *testing.T) {
 func TestSampleProxy(t *testing.T) {
 	server := createHttpServer("localhost:9000", "testing 123", 200)
 	defer func() {
-		if err := server.Shutdown(nil); err != nil {
+		if err := server.Close(); err != nil {
 			panic(err)
 		}
 	}()
@@ -108,7 +108,7 @@ func TestSampleProxy(t *testing.T) {
 func TestSampleProxyWithValidAuthCredentials(t *testing.T) {
 	server := createHttpServer("localhost:9000", "testing 123", 200)
 	defer func() {
-		if err := server.Shutdown(nil); err != nil {
+		if err := server.Close(); err != nil {
 			panic(err)
 		}
 	}()
@@ -132,6 +132,46 @@ func TestSampleProxyWithValidAuthCredentials(t *testing.T) {
 	if response != expected_response {
 		t.Fatalf("Expected '%s' but got '%s'", expected_response, response)
 	}
+
+	incoming.CloseClient()
+	<-cleanedUp
+}
+
+func TestSampleProxyViaConnect(t *testing.T) {
+	server := createHttpServer("localhost:9000", "testing 123", 200)
+	defer func() {
+		if err := server.Close(); err != nil {
+			panic(err)
+		}
+	}()
+
+	cleanedUp := make(chan bool)
+	incoming := NewMockConn()
+	conn := NewConnection(incoming)
+	go func() {
+		conn.Handle()
+		cleanedUp <- true
+	}()
+
+	// Mimic a TLS connect here
+	connect_request := "CONNECT localhost:9000 HTTP/1.1\r\nnHost: localhost:9000\r\n\r\n"
+	incoming.ClientWriter.Write([]byte(connect_request))
+	response := readMessage(incoming.ClientReader)
+	expected_response := "HTTP/1.0 200 Connection established\r\n\r\n"
+	if response != expected_response {
+		t.Fatalf("Expected '%s' but got '%s'", expected_response, response)
+	}
+
+
+	// Mimic a regular http request
+	request := "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+	incoming.ClientWriter.Write([]byte(request))
+	response = readMessage(incoming.ClientReader)
+	expected_response = "HTTP/1.1 200 OK\r\nDate: FAKE\r\nContent-Length: 11\r\nContent-Type: text/plain; charset=utf-8\r\n\r\ntesting 123"
+	if response != expected_response {
+		t.Fatalf("Expected '%s' but got '%s'", expected_response, response)
+	}
+
 
 	incoming.CloseClient()
 	<-cleanedUp
