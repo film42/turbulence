@@ -2,8 +2,8 @@ package main
 
 import (
 	"io"
-	"net/http"
 	"net"
+	"net/http"
 	"strings"
 	"testing"
 )
@@ -50,7 +50,7 @@ func readMessage(reader io.Reader) string {
 }
 
 func TestMain(m *testing.M) {
-	InitLogger()
+	InitNullLogger()
 	m.Run()
 }
 
@@ -163,7 +163,6 @@ func TestSampleProxyViaConnect(t *testing.T) {
 		t.Fatalf("Expected '%s' but got '%s'", expected_response, response)
 	}
 
-
 	// Mimic a regular http request
 	request := "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
 	incoming.ClientWriter.Write([]byte(request))
@@ -172,7 +171,6 @@ func TestSampleProxyViaConnect(t *testing.T) {
 	if response != expected_response {
 		t.Fatalf("Expected '%s' but got '%s'", expected_response, response)
 	}
-
 
 	incoming.CloseClient()
 	<-cleanedUp

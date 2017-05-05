@@ -5,6 +5,12 @@ import (
 	"os"
 )
 
+type nullWriter struct{}
+
+func (nullWriter) Write(p []byte) (n int, err error) {
+	return len(p), nil
+}
+
 type Logger struct {
 	Info  *log.Logger
 	Warn  *log.Logger
@@ -15,6 +21,14 @@ var logger *Logger
 
 func InitLogger() {
 	logger = NewLogger()
+}
+
+func InitNullLogger() {
+	nw := nullWriter{}
+	InitLogger()
+	logger.Info.SetOutput(nw)
+	logger.Warn.SetOutput(nw)
+	logger.Fatal.SetOutput(nw)
 }
 
 func NewLogger() *Logger {
