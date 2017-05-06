@@ -28,14 +28,11 @@ func createHttpServer(address, payload string, code int) *http.Server {
 }
 
 func resetCredentials() {
-	setCredentials("", "")
-	AuthenticationRequired = false
+	config.Credentials = []Credential{}
 }
 
 func setCredentials(user, pass string) {
-	AuthenticationRequired = true
-	Username = user
-	Password = pass
+	config.Credentials = []Credential{Credential{Username: user, Password: pass}}
 }
 
 func basicHttpProxyRequest() string {
@@ -50,6 +47,7 @@ func readMessage(reader io.Reader) string {
 }
 
 func TestMain(m *testing.M) {
+	config = &Config{}
 	InitNullLogger()
 	m.Run()
 }
