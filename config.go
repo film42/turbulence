@@ -6,6 +6,8 @@ import (
 	"io"
 )
 
+var InvalidCredentials = errors.New("Invalid credentials provided. Must have a username/ password or none at all.")
+
 type Credential struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -34,7 +36,7 @@ func validCredentials(username, password string) bool {
 func (config *Config) Validate() error {
 	for _, credential := range config.Credentials {
 		if !validCredentials(credential.Username, credential.Password) {
-			return errors.New("Invalid credentials provided. Must have a username/ password or none at all.")
+			return InvalidCredentials
 		}
 	}
 

@@ -69,6 +69,8 @@ func main() {
 			logger.Fatal.Println("Could not parse config file", err)
 			os.Exit(1)
 		}
+
+		configFile.Close()
 	} else {
 		config = &Config{
 			Port:              *portPtr,
