@@ -79,7 +79,7 @@ func main() {
 
 		if *usernamePtr != "" {
 			config.Credentials = []Credential{
-				Credential{Username: *usernamePtr, Password: *passwordPtr},
+				{Username: *usernamePtr, Password: *passwordPtr},
 			}
 		}
 	}

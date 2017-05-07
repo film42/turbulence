@@ -53,7 +53,7 @@ func TestInvalidConfigFormat(t *testing.T) {
 
 func TestConfigInavlidUsername(t *testing.T) {
 	sampleConfig := &Config{
-		Credentials: []Credential{Credential{Username: "", Password: "test"}},
+		Credentials: []Credential{{Username: "", Password: "test"}},
 	}
 
 	if sampleConfig.Validate() != InvalidCredentials {
@@ -63,7 +63,7 @@ func TestConfigInavlidUsername(t *testing.T) {
 
 func TestConfigInavlidPassword(t *testing.T) {
 	sampleConfig := &Config{
-		Credentials: []Credential{Credential{Username: "test", Password: ""}},
+		Credentials: []Credential{{Username: "test", Password: ""}},
 	}
 
 	if sampleConfig.Validate() != InvalidCredentials {
