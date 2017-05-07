@@ -7,10 +7,7 @@ import (
 	"strconv"
 )
 
-var AuthenticationRequired = false
-var Username = ""
-var Password = ""
-var StripProxyHeaders = true
+var config *Config
 
 func handleConnection(conn net.Conn) {
 	connection := NewConnection(conn)
@@ -34,17 +31,6 @@ func acceptedConnsChannel(listener net.Listener) chan net.Conn {
 	return channel
 }
 
-func validCredentials(username, password string) bool {
-	if username == "" && password == "" {
-		return true
-	}
-	if username != "" && password != "" {
-		AuthenticationRequired = true
-		return true
-	}
-	return false
-}
-
 func listenAndServe(port int) {
 	listenOn := ":" + strconv.Itoa(port)
 	server, err := net.Listen("tcp", listenOn)
@@ -64,25 +50,50 @@ func listenAndServe(port int) {
 func main() {
 	InitLogger()
 
+	configPtr := flag.String("config", "", "config file")
 	portPtr := flag.Int("port", 25000, "listen port")
+	stripProxyHeadersPtr := flag.Bool("strip-proxy-headers", true, "strip proxy headers from http requests")
 	usernamePtr := flag.String("username", "", "username for proxy authentication")
 	passwordPtr := flag.String("password", "", "password for proxy authentication")
-	stripProxyHeadersPtr := flag.Bool("strip-proxy-headers", true, "strip proxy headers from http requests")
 	flag.Parse()
 
-	if !validCredentials(*usernamePtr, *passwordPtr) {
-		logger.Fatal.Println("Invalid credentials provided. Must have a username/password or none at all.")
+	if *configPtr != "" {
+		configFile, err := os.Open(*configPtr)
+		if err != nil {
+			logger.Fatal.Println("Could not open config file", err)
+			os.Exit(1)
+		}
+
+		config, err = NewConfigFromReader(configFile)
+		if err != nil {
+			logger.Fatal.Println("Could not parse config file", err)
+			os.Exit(1)
+		}
+
+		configFile.Close()
+	} else {
+		config = &Config{
+			Port:              *portPtr,
+			StripProxyHeaders: *stripProxyHeadersPtr,
+		}
+
+		if *usernamePtr != "" {
+			config.Credentials = []Credential{
+				Credential{Username: *usernamePtr, Password: *passwordPtr},
+			}
+		}
+	}
+
+	err := config.Validate()
+	if err != nil {
+		logger.Fatal.Println("Config is not valid:", err)
 		os.Exit(1)
 	}
 
-	if AuthenticationRequired {
+	if config.AuthenticationRequired() {
 		logger.Info.Println("Credentials provided. Proxy authentication will be required for all connections.")
-		Username = *usernamePtr
-		Password = *passwordPtr
 	}
 
-	StripProxyHeaders = *stripProxyHeadersPtr
-
 	logger.Info.Println("Prepare for takeoff...")
-	listenAndServe(*portPtr)
+	listenAndServe(config.Port)
 }

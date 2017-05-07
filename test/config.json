@@ -1,0 +1,14 @@
+{
+  "port": 26000,
+  "strip_proxy_headers": true,
+  "credentials": [
+    {
+      "username": "login",
+      "password": "yolo"
+    },
+    {
+      "username": "ron.swanson",
+      "password": "g0ld5topsTheGovt"
+    }
+  ]
+}

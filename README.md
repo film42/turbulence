@@ -24,6 +24,8 @@ Turbluence only allows the listen port, proxy username, and proxy password to be
 
 ```
 Usage of ./turbulence:
+  -config string
+        config file
   -password string
         password for proxy authentication
   -port int
@@ -35,6 +37,28 @@ Usage of ./turbulence:
 ```
 
 Turbulence supports basic authentication. Other massive proxies like Squid support complex authentication, whitelisting and custom headers, but Turbulence doesn't try to solve these other problems. It's built to do as little as possible. If you _need_ authentication or the ability to modify headers, then you should use a different proxy, but if whitelisting is good enough, use `iptables` instead. Even if you use Squid's whitelisting, the proxy is still publicly accessible and will respond to proxy connections with an unauthorized error. If you're using a cloud provider like amazon or google, be sure to use their firewall tools.
+
+If you want to use a sample config instead of passing your options as command line arguments, you may do so. Here's an
+example config:
+
+```
+{
+  "port": 9000,
+  "strip_proxy_headers": true,
+  "credentials": [
+    {
+      "username": "ron.swanson",
+      "password": "g0ld5topsTheGovt"
+    }
+  ]
+}
+```
+
+Save and run:
+
+```
+./turbulence --config config_for_ron.json
+```
 
 ### Purpose
 

@@ -37,19 +37,19 @@ func (c *connection) Handle() {
 
 	defer request.Body.Close()
 
-	if AuthenticationRequired && !credentialsAreValid(request) {
+	if !isAuthenticated(request) {
 		logger.Fatal.Println(c.id, "Invalid credentials.")
 		c.incoming.Write([]byte(ProxyAuthenticationRequired))
 		return
 	}
 
 	// Delete the auth and proxy headers.
-	if AuthenticationRequired {
+	if config.AuthenticationRequired() {
 		request.Header.Del("Proxy-Authorization")
 	}
 
 	// Delete any other proxy related thing if enabled.
-	if StripProxyHeaders {
+	if config.StripProxyHeaders {
 		request.Header.Del("Forwarded")
 		request.Header.Del("Proxy-Connection")
 		request.Header.Del("Via")
@@ -117,23 +117,22 @@ func parseBasicAuth(auth string) (username, password string, ok bool) {
 	return cs[:s], cs[s+1:], true
 }
 
-func credentialsAreValid(request *http.Request) bool {
+func isAuthenticated(request *http.Request) bool {
+	if !config.AuthenticationRequired() {
+		return true
+	}
+
 	proxyAuthHeader := request.Header.Get("Proxy-Authorization")
 	if proxyAuthHeader == "" {
 		return false
 	}
 
 	username, password, ok := parseBasicAuth(proxyAuthHeader)
-
 	if !ok {
 		return false
 	}
 
-	if username == Username && password == Password {
-		return true
-	}
-
-	return false
+	return config.IsAuthenticated(username, password)
 }
 
 func newConnectionId() string {
