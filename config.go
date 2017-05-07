@@ -9,13 +9,13 @@ import (
 var InvalidCredentials = errors.New("Invalid credentials provided. Must have a username/ password or none at all.")
 
 type Credential struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string
+	Password string
 }
 
 type Config struct {
-	Credentials       []Credential `json:"credentials"`
-	StripProxyHeaders bool         `json:"strip_proxy_headers"`
+	Credentials       []Credential
+	StripProxyHeaders bool `json:"strip_proxy_headers"`
 	Port              int
 }
 
