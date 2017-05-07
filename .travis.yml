@@ -1,0 +1,8 @@
+language: go
+
+go:
+  - 1.8
+
+script:
+  - diff <(echo -n) <(gofmt -s -d .)
+  - go test -v -race ./...
