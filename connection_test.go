@@ -32,7 +32,7 @@ func resetCredentials() {
 }
 
 func setCredentials(user, pass string) {
-	config.Credentials = []Credential{Credential{Username: user, Password: pass}}
+	config.Credentials = []Credential{{Username: user, Password: pass}}
 }
 
 func basicHttpProxyRequest() string {

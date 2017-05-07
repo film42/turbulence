@@ -1,6 +1,8 @@
 Turbulence
 ==========
 
+[![Build Status](https://travis-ci.org/film42/turbulence.svg)](https://travis-ci.org/film42/turbulence)
+
 An http/https proxy for navigating through rough air. This proxy is not full-featured. It doesn't support authentication, whitelisting or custom headers. It's less than 300 lines of code, transparent, and does as little as possible. Be sure to read through the code, it should take you less than 5 minutes.
 
 ### Installing
