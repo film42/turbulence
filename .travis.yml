@@ -6,3 +6,6 @@ go:
 script:
   - diff <(echo -n) <(gofmt -s -d .)
   - go test -v -race ./...
+
+notifications:
+  email: false

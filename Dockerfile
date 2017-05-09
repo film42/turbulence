@@ -1,6 +1,6 @@
-FROM golang:1.7.3-alpine
+FROM golang:1.8.1-alpine
 ADD . /turbulence
 WORKDIR /turbulence
 ENV GOPATH /turbulence
 RUN go build
-CMD ["/turbulence/turbulence"]
+ENTRYPOINT ["/bin/sh", "-c", "/turbulence/turbulence ${*}", "--"]
