@@ -3,7 +3,7 @@ Turbulence
 
 [![Build Status](https://travis-ci.org/film42/turbulence.svg)](https://travis-ci.org/film42/turbulence)
 
-An http/https proxy for navigating through rough air. This proxy is not full-featured. It doesn't support authentication, whitelisting or custom headers. It's less than 300 lines of code, transparent, and does as little as possible. Be sure to read through the code, it should take you less than 5 minutes.
+An http/https proxy for navigating through rough air. This proxy is not full-featured. It doesn't support authentication, whitelisting or custom headers. It's small, transparent, and does as little as possible. Be sure to read through the code, it should take you less than 5 minutes.
 
 ### Installing
 
@@ -17,7 +17,7 @@ $ ./bin/turbulence
 Or you can grab the pre-built docker container:
 
 ```
-$ docker run -p 25000:25000 -d film42/turbulence:latest
+$ docker run -p 26000:26000 -d film42/turbulence:latest --config test/config.json
 ```
 
 ### Configuring
