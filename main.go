@@ -2,50 +2,12 @@ package main
 
 import (
 	"flag"
-	"net"
 	"os"
-	"strconv"
+	"os/signal"
+	"syscall"
 )
 
 var config *Config
-
-func handleConnection(conn net.Conn) {
-	connection := NewConnection(conn)
-	defer connection.Close()
-	connection.Handle()
-}
-
-func acceptedConnsChannel(listener net.Listener) chan net.Conn {
-	channel := make(chan net.Conn)
-	go func() {
-		for {
-			conn, err := listener.Accept()
-			if err != nil {
-				logger.Warn.Println("Could not accept socket:", err)
-				continue
-			}
-
-			channel <- conn
-		}
-	}()
-	return channel
-}
-
-func listenAndServe(port int) {
-	listenOn := ":" + strconv.Itoa(port)
-	server, err := net.Listen("tcp", listenOn)
-	if err != nil {
-		logger.Fatal.Println("Could not start server:", err)
-		os.Exit(1)
-	}
-
-	logger.Info.Println("Server started on", listenOn)
-
-	acceptedConnsChannel := acceptedConnsChannel(server)
-	for {
-		go handleConnection(<-acceptedConnsChannel)
-	}
-}
 
 func main() {
 	InitLogger()
@@ -95,5 +57,14 @@ func main() {
 	}
 
 	logger.Info.Println("Prepare for takeoff...")
-	listenAndServe(config.Port)
+
+	server := NewServer()
+	go server.ListenAndServe(config.Port)
+
+	signalChannel := make(chan os.Signal)
+	signal.Notify(signalChannel, syscall.SIGINT, syscall.SIGTERM)
+	logger.Info.Println(<-signalChannel, "detected! Waiting for connections to finish...")
+
+	server.Shutdown()
+	logger.Info.Println("Touch down!")
 }
