@@ -63,8 +63,19 @@ func main() {
 
 	signalChannel := make(chan os.Signal)
 	signal.Notify(signalChannel, syscall.SIGINT, syscall.SIGTERM)
-	logger.Info.Println(<-signalChannel, "detected! Waiting for connections to finish...")
+	logger.Info.Println(<-signalChannel, "detected! Waiting for connections to finish. Interrupt again to force stop.")
 
-	server.Shutdown()
-	logger.Info.Println("Touch down!")
+	shutdownCompleteChannel := make(chan bool)
+	go func() {
+		server.Shutdown()
+		shutdownCompleteChannel <- true
+	}()
+
+	select {
+	case <-shutdownCompleteChannel:
+		logger.Info.Println("Graceful shutdown copmlete!")
+	case <-signalChannel:
+		logger.Info.Println("Force shutdown complete!")
+	}
+
 }
