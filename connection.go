@@ -24,6 +24,8 @@ type connection struct {
 func (c *connection) Handle() {
 	logger.Info.Println(c.id, "Handling new connection.")
 
+	defer c.Close()
+
 	reader := bufio.NewReader(c.incoming)
 	request, err := http.ReadRequest(reader)
 	if err == io.EOF {
