@@ -32,6 +32,8 @@ Usage of ./turbulence:
         password for proxy authentication
   -port int
         listen port (default 25000)
+  -shutdown-timeout int
+        seconds to wait while cleaning up for connections to finish (default 60)
   -strip-proxy-headers
         strip proxy headers from http requests (default true)
   -username string

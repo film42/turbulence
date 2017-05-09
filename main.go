@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 var config *Config
@@ -17,6 +18,7 @@ func main() {
 	stripProxyHeadersPtr := flag.Bool("strip-proxy-headers", true, "strip proxy headers from http requests")
 	usernamePtr := flag.String("username", "", "username for proxy authentication")
 	passwordPtr := flag.String("password", "", "password for proxy authentication")
+	shutdownTimeoutPtr := flag.Int("shutdown-timeout", 60, "seconds to wait while cleaning up for connections to finish")
 	flag.Parse()
 
 	if *configPtr != "" {
@@ -71,7 +73,11 @@ func main() {
 		shutdownCompleteChannel <- true
 	}()
 
+	shutdownTimer := time.NewTimer(time.Duration(time.Duration(*shutdownTimeoutPtr) * time.Second))
+
 	select {
+	case <-shutdownTimer.C:
+		logger.Warn.Println("Graceful shutdown timeout expired. Forcing shutdown!")
 	case <-shutdownCompleteChannel:
 		logger.Info.Println("Graceful shutdown copmlete!")
 	case <-signalChannel:
