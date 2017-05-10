@@ -49,6 +49,7 @@ example config:
 {
   "port": 9000,
   "strip_proxy_headers": true,
+  "shutdown_timeout": 120,
   "credentials": [
     {
       "username": "ron.swanson",

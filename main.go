@@ -10,9 +10,7 @@ import (
 
 var config *Config
 
-func main() {
-	InitLogger()
-
+func initConfigFromFlags() {
 	configPtr := flag.String("config", "", "config file")
 	portPtr := flag.Int("port", 25000, "listen port")
 	stripProxyHeadersPtr := flag.Bool("strip-proxy-headers", true, "strip proxy headers from http requests")
@@ -21,6 +19,18 @@ func main() {
 	shutdownTimeoutPtr := flag.Int("shutdown-timeout", 60, "seconds to wait while cleaning up for connections to finish")
 	flag.Parse()
 
+	config = &Config{
+		Port:              *portPtr,
+		StripProxyHeaders: *stripProxyHeadersPtr,
+		ShutdownTimeout:   *shutdownTimeoutPtr,
+	}
+
+	if *usernamePtr != "" {
+		config.Credentials = []Credential{
+			{Username: *usernamePtr, Password: *passwordPtr},
+		}
+	}
+
 	if *configPtr != "" {
 		configFile, err := os.Open(*configPtr)
 		if err != nil {
@@ -28,25 +38,19 @@ func main() {
 			os.Exit(1)
 		}
 
-		config, err = NewConfigFromReader(configFile)
+		err = config.LoadConfigFromReader(configFile)
 		if err != nil {
 			logger.Fatal.Println("Could not parse config file", err)
 			os.Exit(1)
 		}
 
 		configFile.Close()
-	} else {
-		config = &Config{
-			Port:              *portPtr,
-			StripProxyHeaders: *stripProxyHeadersPtr,
-		}
-
-		if *usernamePtr != "" {
-			config.Credentials = []Credential{
-				{Username: *usernamePtr, Password: *passwordPtr},
-			}
-		}
 	}
+}
+
+func main() {
+	InitLogger()
+	initConfigFromFlags()
 
 	err := config.Validate()
 	if err != nil {
@@ -73,7 +77,8 @@ func main() {
 		shutdownCompleteChannel <- true
 	}()
 
-	shutdownTimer := time.NewTimer(time.Duration(time.Duration(*shutdownTimeoutPtr) * time.Second))
+	logger.Info.Println("Waiting up to", config.ShutdownTimeoutDuration(), "for open connections to finish.")
+	shutdownTimer := time.NewTimer(config.ShutdownTimeoutDuration())
 
 	select {
 	case <-shutdownTimer.C:

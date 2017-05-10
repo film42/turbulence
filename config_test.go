@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestLoadingConfigFromFile(t *testing.T) {
@@ -25,6 +26,15 @@ func TestLoadingConfigFromFile(t *testing.T) {
 
 	if !sampleConfig.AuthenticationRequired() {
 		t.Fatal("Expected sample config to require authentication")
+	}
+
+	if sampleConfig.ShutdownTimeout != 100 {
+		t.Fatal("Expected sample config shutdown timeout to be 100 but found", sampleConfig.ShutdownTimeout)
+	}
+
+	expectedShutdownDuration := time.Duration(100 * time.Second)
+	if sampleConfig.ShutdownTimeoutDuration() != expectedShutdownDuration {
+		t.Fatal("Expected sample config shutdown timeout to be", expectedShutdownDuration, "but found", sampleConfig.ShutdownTimeoutDuration())
 	}
 
 	credentialsLen := len(sampleConfig.Credentials)
@@ -68,5 +78,22 @@ func TestConfigInavlidPassword(t *testing.T) {
 
 	if sampleConfig.Validate() != InvalidCredentials {
 		t.Fatal("Expected password to be invalid")
+	}
+}
+
+func TestLoadConfigFromReader(t *testing.T) {
+	sampleConfig := &Config{
+		StripProxyHeaders: true,
+	}
+
+	if !sampleConfig.StripProxyHeaders {
+		t.Fatal("Expected stip proxy headers to be true")
+	}
+
+	json := `{"strip_proxy_headers":false}`
+	sampleConfig.LoadConfigFromReader(strings.NewReader(json))
+
+	if sampleConfig.StripProxyHeaders {
+		t.Fatal("Expected stip proxy headers to be false")
 	}
 }

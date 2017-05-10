@@ -1,6 +1,7 @@
 {
   "port": 26000,
   "strip_proxy_headers": true,
+  "shutdown_timeout": 100,
   "credentials": [
     {
       "username": "login",
