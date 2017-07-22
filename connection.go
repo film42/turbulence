@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -95,6 +96,27 @@ func (c *connection) Close() {
 	}
 
 	logger.Info.Println(c.id, "Connection closed.")
+}
+
+func parseAddrFromHostport(hostport string) (string, error) {
+	if len(hostport) == 0 {
+		return "", errors.New("Hostport string provided was empty.")
+	}
+
+	colonIndex := strings.IndexByte(hostport, ':')
+	if colonIndex == -1 {
+		return "", errors.New("No colon was provided in the net.Conn local address (hostport string).")
+	}
+
+	if i := strings.Index(hostport, "]:"); i != -1 {
+		return hostport[:i+len("]")], nil
+	}
+
+	if strings.Contains(hostport, "]") {
+		return "", errors.New("Invalid ipv6 local address provided as hostport string.")
+	}
+
+	return hostport[:colonIndex], nil
 }
 
 // COPIED FROM STD LIB TO USE WITH PROXY-AUTH HEADER
