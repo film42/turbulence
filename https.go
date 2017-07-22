@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
 )
 
@@ -14,7 +13,7 @@ type httpsProxy struct{}
 func (hp *httpsProxy) SetupOutgoing(connection *connection, request *http.Request) error {
 	// Create our outgoing connection.
 	outgoingHost := request.URL.Host
-	outgoingConn, err := net.Dial("tcp", outgoingHost)
+	outgoingConn, err := connection.Dial("tcp", outgoingHost)
 	if err != nil {
 		return errors.New(fmt.Sprint("Error opening outgoing connection to", outgoingHost, err))
 	}

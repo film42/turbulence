@@ -58,6 +58,7 @@ func main() {
 	configPtr := flag.String("config", "", "config file")
 	portPtr := flag.Int("port", 25000, "listen port")
 	stripProxyHeadersPtr := flag.Bool("strip-proxy-headers", true, "strip proxy headers from http requests")
+	followLocalAddrPtr := flag.Bool("follow-local-addr", true, "Use the local address of the incoming connection when connecting upstream")
 	usernamePtr := flag.String("username", "", "username for proxy authentication")
 	passwordPtr := flag.String("password", "", "password for proxy authentication")
 	flag.Parse()
@@ -80,6 +81,7 @@ func main() {
 		config = &Config{
 			Port:              *portPtr,
 			StripProxyHeaders: *stripProxyHeadersPtr,
+			FollowLocalAddr:   *followLocalAddrPtr,
 		}
 
 		if *usernamePtr != "" {

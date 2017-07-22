@@ -17,6 +17,7 @@ type Config struct {
 	Credentials       []Credential
 	StripProxyHeaders bool `json:"strip_proxy_headers"`
 	Port              int
+	FollowLocalAddr   bool `json:"follow_local_addr"`
 }
 
 func (config *Config) AuthenticationRequired() bool {

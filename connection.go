@@ -20,7 +20,26 @@ type connection struct {
 	incoming net.Conn
 	outgoing net.Conn
 	proxy
-	localIP string
+	localAddr net.Addr
+}
+
+func (c *connection) Dial(network, address string) (net.Conn, error) {
+	if config.FollowLocalAddr {
+		dialer := &net.Dialer{LocalAddr: c.localAddr}
+
+		// Try to dial with the incoming LocalAddr to keep the incoming and outgoing IPs the same.
+		conn, err := dialer.Dial(network, address)
+		if err == nil {
+			return conn, nil
+		}
+
+		// If an error occurs, fallback to the default interface. This might happen if you connected
+		// via a loopback interace, like testing on the same machine. We should be more specifc about
+		// error handling, but falling back is fine for now.
+		logger.Warn.Println(c.id, "Ignoring net.Addr for", c.localAddr, "dialing due to error:", err)
+	}
+
+	return net.Dial(network, address)
 }
 
 func (c *connection) Handle() {
@@ -145,7 +164,7 @@ func newConnectionId() string {
 	return "[" + hex.EncodeToString(bytes) + "]"
 }
 
-func localIPString(addr net.Addr) (string, error) {
+func localAddrString(addr net.Addr) (string, error) {
 	switch a := addr.(type) {
 	case *net.TCPAddr:
 		return a.IP.String(), nil
@@ -159,16 +178,10 @@ func localIPString(addr net.Addr) (string, error) {
 func NewConnection(incoming net.Conn) (*connection, error) {
 	newId := fmt.Sprint(newConnectionId(), " [", incoming.RemoteAddr().String(), "]")
 	localAddr := incoming.LocalAddr()
-	incomingLocalIP, err := localIPString(localAddr)
-
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
 
 	return &connection{
-		id:       newId,
-		incoming: incoming,
-		localIP:  incomingLocalIP,
+		id:        newId,
+		incoming:  incoming,
+		localAddr: localAddr,
 	}, nil
 }
