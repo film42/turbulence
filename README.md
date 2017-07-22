@@ -22,8 +22,6 @@ $ docker run -p 26000:26000 -d film42/turbulence:latest --config test/config.jso
 
 ### Configuring
 
-Turbluence only allows the listen port, proxy username, and proxy password to be configured:
-
 ```
 Usage of ./turbulence:
   -config string
@@ -34,6 +32,8 @@ Usage of ./turbulence:
         listen port (default 25000)
   -strip-proxy-headers
         strip proxy headers from http requests (default true)
+  -use-incoming-local-addr
+        Attempt to use the local address of the incoming connection when connecting upstream (default true)
   -username string
         username for proxy authentication
 ```
@@ -47,6 +47,7 @@ example config:
 {
   "port": 9000,
   "strip_proxy_headers": true,
+  "use_incoming_local_addr": true,
   "credentials": [
     {
       "username": "ron.swanson",
