@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -24,21 +23,39 @@ type connection struct {
 }
 
 func (c *connection) Dial(network, address string) (net.Conn, error) {
-	if config.FollowLocalAddr {
-		dialer := &net.Dialer{LocalAddr: c.localAddr}
-
-		// Try to dial with the incoming LocalAddr to keep the incoming and outgoing IPs the same.
-		conn, err := dialer.Dial(network, address)
-		if err == nil {
-			return conn, nil
-		}
-
-		// If an error occurs, fallback to the default interface. This might happen if you connected
-		// via a loopback interace, like testing on the same machine. We should be more specifc about
-		// error handling, but falling back is fine for now.
-		logger.Warn.Println(c.id, "Ignoring net.Addr for", c.localAddr, "dialing due to error:", err)
+	if !config.FollowLocalAddr {
+		goto fallback
 	}
 
+	if c.localAddr == nil {
+		logger.Warn.Println(c.id, "Missing local net.Addr: a default local net.Addr will be used")
+		goto fallback
+	}
+
+	// Ensure the TCPAddr has its Port set to 0, which is way of telling the dialer to use
+	// and random port.
+	switch tcpAddr := c.localAddr.(type) {
+	case *net.TCPAddr:
+		tcpAddr.Port = 0
+	default:
+		logger.Warn.Println(c.id, "Ignoring local net.Addr", c.localAddr, "because TCPAddr was expected")
+		goto fallback
+	}
+
+	dialer := &net.Dialer{LocalAddr: c.localAddr}
+
+	// Try to dial with the incoming LocalAddr to keep the incoming and outgoing IPs the same.
+	conn, err := dialer.Dial(network, address)
+	if err == nil {
+		return conn, nil
+	}
+
+	// If an error occurs, fallback to the default interface. This might happen if you connected
+	// via a loopback interace, like testing on the same machine. We should be more specifc about
+	// error handling, but falling back is fine for now.
+	logger.Warn.Println(c.id, "Ignoring local net.Addr for", c.localAddr, "dialing due to error:", err)
+
+fallback:
 	return net.Dial(network, address)
 }
 
@@ -162,17 +179,6 @@ func newConnectionId() string {
 		return "[ERROR-MAKING-ID]"
 	}
 	return "[" + hex.EncodeToString(bytes) + "]"
-}
-
-func localAddrString(addr net.Addr) (string, error) {
-	switch a := addr.(type) {
-	case *net.TCPAddr:
-		return a.IP.String(), nil
-	case *net.IPAddr:
-		return a.IP.String(), nil
-	}
-
-	return "", errors.New("Could not find IP Address in net.Addr: " + addr.String())
 }
 
 func NewConnection(incoming net.Conn) (*connection, error) {
