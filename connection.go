@@ -29,10 +29,10 @@ func (c *connection) Dial(network, address string) (net.Conn, error) {
 			goto fallback
 		}
 
-		// Ensure the TCPAddr has its Port set to 0, which is way of telling the dialer to use
-		// and random port.
 		switch tcpAddr := c.localAddr.(type) {
 		case *net.TCPAddr:
+			// Ensure the TCPAddr has its Port set to 0, which is way of telling the dialer to
+			// use any random port. If you don't change this, you'll get a bind error.
 			tcpAddr.Port = 0
 		default:
 			logger.Warn.Println(c.id, "Ignoring local net.Addr", c.localAddr, "because net.TCPAddr was expected")
