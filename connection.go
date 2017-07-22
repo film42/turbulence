@@ -179,7 +179,7 @@ func newConnectionId() string {
 	return "[" + hex.EncodeToString(bytes) + "]"
 }
 
-func NewConnection(incoming net.Conn) (*connection, error) {
+func NewConnection(incoming net.Conn) *connection {
 	newId := fmt.Sprint(newConnectionId(), " [", incoming.RemoteAddr().String(), "]")
 	localAddr := incoming.LocalAddr()
 
@@ -187,5 +187,5 @@ func NewConnection(incoming net.Conn) (*connection, error) {
 		id:        newId,
 		incoming:  incoming,
 		localAddr: localAddr,
-	}, nil
+	}
 }

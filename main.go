@@ -10,12 +10,7 @@ import (
 var config *Config
 
 func handleConnection(conn net.Conn) {
-	connection, err := NewConnection(conn)
-	if err != nil {
-		logger.Fatal.Println(err)
-		return
-	}
-
+	connection := NewConnection(conn)
 	defer connection.Close()
 	connection.Handle()
 }

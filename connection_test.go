@@ -58,7 +58,7 @@ func TestInvalidCredentials(t *testing.T) {
 
 	incoming := NewMockConn()
 	defer incoming.CloseClient()
-	conn, _ := NewConnection(incoming)
+	conn := NewConnection(incoming)
 	go conn.Handle()
 
 	incoming.ClientWriter.Write([]byte(basicHttpProxyRequest()))
@@ -84,7 +84,7 @@ func TestSampleProxy(t *testing.T) {
 	cleanedUp := make(chan bool)
 	incoming := NewMockConn()
 	defer incoming.CloseClient()
-	conn, _ := NewConnection(incoming)
+	conn := NewConnection(incoming)
 	go func() {
 		conn.Handle()
 		cleanedUp <- true
@@ -114,7 +114,7 @@ func TestSampleProxyWithValidAuthCredentials(t *testing.T) {
 
 	cleanedUp := make(chan bool)
 	incoming := NewMockConn()
-	conn, _ := NewConnection(incoming)
+	conn := NewConnection(incoming)
 	go func() {
 		conn.Handle()
 		cleanedUp <- true
@@ -146,7 +146,7 @@ func TestSampleProxyViaConnect(t *testing.T) {
 
 	cleanedUp := make(chan bool)
 	incoming := NewMockConn()
-	conn, _ := NewConnection(incoming)
+	conn := NewConnection(incoming)
 	go func() {
 		conn.Handle()
 		cleanedUp <- true
