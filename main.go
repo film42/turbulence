@@ -53,7 +53,8 @@ func main() {
 	configPtr := flag.String("config", "", "config file")
 	portPtr := flag.Int("port", 25000, "listen port")
 	stripProxyHeadersPtr := flag.Bool("strip-proxy-headers", true, "strip proxy headers from http requests")
-	useIncomingLocalAddr := flag.Bool("use-incoming-local-addr", true, "Attempt to use the local address of the incoming connection when connecting upstream")
+	useIncomingLocalAddr := flag.Bool("use-incoming-local-addr", true, "attempt to use the local address of the incoming connection when connecting upstream")
+	dialTimeoutPtr := flag.Int("dial-timeout", 30, " timeout for connecting to an upstream server in seconds")
 	usernamePtr := flag.String("username", "", "username for proxy authentication")
 	passwordPtr := flag.String("password", "", "password for proxy authentication")
 	flag.Parse()
@@ -77,6 +78,7 @@ func main() {
 			Port:                 *portPtr,
 			StripProxyHeaders:    *stripProxyHeadersPtr,
 			UseIncomingLocalAddr: *useIncomingLocalAddr,
+			DialTimeout:          *dialTimeoutPtr,
 		}
 
 		if *usernamePtr != "" {

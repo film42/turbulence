@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 )
 
 const ProxyAuthenticationRequired = "HTTP/1.0 407 Proxy authentication required\r\n\r\n"
@@ -23,6 +24,8 @@ type connection struct {
 }
 
 func (c *connection) Dial(network, address string) (net.Conn, error) {
+	timeout := time.Second * time.Duration(config.DialTimeout)
+
 	if config.UseIncomingLocalAddr {
 		if c.localAddr == nil {
 			logger.Warn.Println(c.id, "Missing local net.Addr: a default local net.Addr will be used")
@@ -39,7 +42,10 @@ func (c *connection) Dial(network, address string) (net.Conn, error) {
 			goto fallback
 		}
 
-		dialer := &net.Dialer{LocalAddr: c.localAddr}
+		dialer := &net.Dialer{
+			LocalAddr: c.localAddr,
+			Timeout:   timeout,
+		}
 
 		// Try to dial with the incoming LocalAddr to keep the incoming and outgoing IPs the same.
 		conn, err := dialer.Dial(network, address)
@@ -54,7 +60,7 @@ func (c *connection) Dial(network, address string) (net.Conn, error) {
 	}
 
 fallback:
-	return net.Dial(network, address)
+	return net.DialTimeout(network, address, timeout)
 }
 
 func (c *connection) Handle() {

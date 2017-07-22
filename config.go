@@ -18,6 +18,7 @@ type Config struct {
 	StripProxyHeaders    bool `json:"strip_proxy_headers"`
 	Port                 int
 	UseIncomingLocalAddr bool `json:"use_incoming_local_addr"`
+	DialTimeout          int
 }
 
 func (config *Config) AuthenticationRequired() bool {
