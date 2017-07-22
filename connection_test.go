@@ -58,7 +58,7 @@ func TestInvalidCredentials(t *testing.T) {
 
 	incoming := NewMockConn()
 	defer incoming.CloseClient()
-	conn := NewConnection(incoming)
+	conn, _ := NewConnection(incoming)
 	go conn.Handle()
 
 	incoming.ClientWriter.Write([]byte(basicHttpProxyRequest()))
@@ -84,7 +84,7 @@ func TestSampleProxy(t *testing.T) {
 	cleanedUp := make(chan bool)
 	incoming := NewMockConn()
 	defer incoming.CloseClient()
-	conn := NewConnection(incoming)
+	conn, _ := NewConnection(incoming)
 	go func() {
 		conn.Handle()
 		cleanedUp <- true
@@ -114,7 +114,7 @@ func TestSampleProxyWithValidAuthCredentials(t *testing.T) {
 
 	cleanedUp := make(chan bool)
 	incoming := NewMockConn()
-	conn := NewConnection(incoming)
+	conn, _ := NewConnection(incoming)
 	go func() {
 		conn.Handle()
 		cleanedUp <- true
@@ -146,7 +146,7 @@ func TestSampleProxyViaConnect(t *testing.T) {
 
 	cleanedUp := make(chan bool)
 	incoming := NewMockConn()
-	conn := NewConnection(incoming)
+	conn, _ := NewConnection(incoming)
 	go func() {
 		conn.Handle()
 		cleanedUp <- true
@@ -172,36 +172,4 @@ func TestSampleProxyViaConnect(t *testing.T) {
 
 	incoming.CloseClient()
 	<-cleanedUp
-}
-
-func TestParsingAddrFromHostport(t *testing.T) {
-	_, err := parseAddrFromHostport("")
-	if err == nil {
-		t.Fatal("Expected an error.")
-	}
-
-	_, err = parseAddrFromHostport("1.1.1.1")
-	if err == nil {
-		t.Fatal("Expected an error.")
-	}
-
-	_, err = parseAddrFromHostport("[2001:db8::1]")
-	if err == nil {
-		t.Fatal("Expected an error.")
-	}
-
-	_, err = parseAddrFromHostport("somerandomstring.com")
-	if err == nil {
-		t.Fatal("Expected an error.")
-	}
-
-	ipv4Addr, _ := parseAddrFromHostport("1.1.1.1:8000")
-	if ipv4Addr != "1.1.1.1" {
-		t.Fatalf("Expected 1.1.1.1 but found %s", ipv4Addr)
-	}
-
-	ipv6Addr, _ := parseAddrFromHostport("[2001:db8::1]:80")
-	if ipv6Addr != "[2001:db8::1]" {
-		t.Fatalf("Expected [2001:db8::1] but found %s", ipv6Addr)
-	}
 }

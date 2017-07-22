@@ -20,6 +20,7 @@ type connection struct {
 	incoming net.Conn
 	outgoing net.Conn
 	proxy
+	localIP string
 }
 
 func (c *connection) Handle() {
@@ -98,27 +99,6 @@ func (c *connection) Close() {
 	logger.Info.Println(c.id, "Connection closed.")
 }
 
-func parseAddrFromHostport(hostport string) (string, error) {
-	if len(hostport) == 0 {
-		return "", errors.New("Hostport string provided was empty.")
-	}
-
-	colonIndex := strings.IndexByte(hostport, ':')
-	if colonIndex == -1 {
-		return "", errors.New("No colon was provided in the net.Conn local address (hostport string).")
-	}
-
-	if i := strings.Index(hostport, "]:"); i != -1 {
-		return hostport[:i+len("]")], nil
-	}
-
-	if strings.Contains(hostport, "]") {
-		return "", errors.New("Invalid ipv6 local address provided as hostport string.")
-	}
-
-	return hostport[:colonIndex], nil
-}
-
 // COPIED FROM STD LIB TO USE WITH PROXY-AUTH HEADER
 // parseBasicAuth parses an HTTP Basic Authentication string.
 // "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==" returns ("Aladdin", "open sesame", true).
@@ -165,11 +145,30 @@ func newConnectionId() string {
 	return "[" + hex.EncodeToString(bytes) + "]"
 }
 
-func NewConnection(incoming net.Conn) *connection {
+func localIPString(addr net.Addr) (string, error) {
+	switch a := addr.(type) {
+	case *net.TCPAddr:
+		return a.IP.String(), nil
+	case *net.IPAddr:
+		return a.IP.String(), nil
+	}
+
+	return "", errors.New("Could not find IP Address in net.Addr: " + addr.String())
+}
+
+func NewConnection(incoming net.Conn) (*connection, error) {
 	newId := fmt.Sprint(newConnectionId(), " [", incoming.RemoteAddr().String(), "]")
+	localAddr := incoming.LocalAddr()
+	incomingLocalIP, err := localIPString(localAddr)
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
 
 	return &connection{
 		id:       newId,
 		incoming: incoming,
-	}
+		localIP:  incomingLocalIP,
+	}, nil
 }
