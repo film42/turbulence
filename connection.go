@@ -23,12 +23,12 @@ type connection struct {
 }
 
 func (c *connection) Dial(network, address string) (net.Conn, error) {
-	if c.localAddr == nil {
-		logger.Warn.Println(c.id, "Missing local net.Addr: a default local net.Addr will be used")
-		goto fallback
-	}
-
 	if config.UseIncomingLocalAddr {
+		if c.localAddr == nil {
+			logger.Warn.Println(c.id, "Missing local net.Addr: a default local net.Addr will be used")
+			goto fallback
+		}
+
 		// Ensure the TCPAddr has its Port set to 0, which is way of telling the dialer to use
 		// and random port.
 		switch tcpAddr := c.localAddr.(type) {
