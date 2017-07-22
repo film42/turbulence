@@ -1,6 +1,7 @@
 {
   "port": 26000,
   "strip_proxy_headers": true,
+  "use_incoming_local_addr": false,
   "credentials": [
     {
       "username": "login",

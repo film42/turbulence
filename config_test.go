@@ -23,6 +23,10 @@ func TestLoadingConfigFromFile(t *testing.T) {
 		t.Fatal("Expected sampleConfig.StripProxyHeaders to be true")
 	}
 
+	if sampleConfig.UseIncomingLocalAddr {
+		t.Fatal("Expected sampleConfig.UseIncomingLocalAddr to be false")
+	}
+
 	if !sampleConfig.AuthenticationRequired() {
 		t.Fatal("Expected sample config to require authentication")
 	}
