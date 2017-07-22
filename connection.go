@@ -35,7 +35,7 @@ func (c *connection) Dial(network, address string) (net.Conn, error) {
 		case *net.TCPAddr:
 			tcpAddr.Port = 0
 		default:
-			logger.Warn.Println(c.id, "Ignoring local net.Addr", c.localAddr, "because TCPAddr was expected")
+			logger.Warn.Println(c.id, "Ignoring local net.Addr", c.localAddr, "because net.TCPAddr was expected")
 			goto fallback
 		}
 
