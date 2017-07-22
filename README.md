@@ -26,6 +26,8 @@ $ docker run -p 26000:26000 -d film42/turbulence:latest --config test/config.jso
 Usage of ./turbulence:
   -config string
         config file
+  -dial-timeout int
+         timeout for connecting to an upstream server in seconds (default 30)
   -password string
         password for proxy authentication
   -port int
@@ -33,7 +35,7 @@ Usage of ./turbulence:
   -strip-proxy-headers
         strip proxy headers from http requests (default true)
   -use-incoming-local-addr
-        Attempt to use the local address of the incoming connection when connecting upstream (default true)
+        attempt to use the local address of the incoming connection when connecting upstream (default true)
   -username string
         username for proxy authentication
 ```
@@ -48,6 +50,7 @@ example config:
   "port": 9000,
   "strip_proxy_headers": true,
   "use_incoming_local_addr": true,
+  "dial_timeout": 30,
   "credentials": [
     {
       "username": "ron.swanson",
