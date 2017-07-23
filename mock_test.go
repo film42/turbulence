@@ -6,20 +6,6 @@ import (
 	"time"
 )
 
-// Addr is a fake network interface which implements the net.Addr interface
-type Addr struct {
-	NetworkString string
-	AddrString    string
-}
-
-func (a Addr) Network() string {
-	return a.NetworkString
-}
-
-func (a Addr) String() string {
-	return a.AddrString
-}
-
 type MockConn struct {
 	ServerReader *io.PipeReader
 	ServerWriter *io.PipeWriter
@@ -51,16 +37,18 @@ func (c MockConn) Read(data []byte) (n int, err error)  { return c.ServerReader.
 func (c MockConn) Write(data []byte) (n int, err error) { return c.ServerWriter.Write(data) }
 
 func (c MockConn) LocalAddr() net.Addr {
-	return Addr{
-		NetworkString: "tcp",
-		AddrString:    "127.0.0.1",
+	return &net.TCPAddr{
+		IP:   net.ParseIP("127.0.0.1:2342"),
+		Port: 2342,
+		Zone: "",
 	}
 }
 
 func (c MockConn) RemoteAddr() net.Addr {
-	return Addr{
-		NetworkString: "tcp",
-		AddrString:    "127.0.0.1",
+	return &net.TCPAddr{
+		IP:   net.ParseIP("127.0.0.1:2342"),
+		Port: 2342,
+		Zone: "",
 	}
 }
 

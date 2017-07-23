@@ -14,9 +14,11 @@ type Credential struct {
 }
 
 type Config struct {
-	Credentials       []Credential
-	StripProxyHeaders bool `json:"strip_proxy_headers"`
-	Port              int
+	Credentials          []Credential
+	StripProxyHeaders    bool `json:"strip_proxy_headers"`
+	Port                 int
+	UseIncomingLocalAddr bool `json:"use_incoming_local_addr"`
+	DialTimeout          int  `json:"dial_timeout"`
 }
 
 func (config *Config) AuthenticationRequired() bool {

@@ -19,8 +19,16 @@ func TestLoadingConfigFromFile(t *testing.T) {
 		t.Fatal("Expected port to be 26000 but found:", sampleConfig.Port)
 	}
 
+	if sampleConfig.DialTimeout != 10 {
+		t.Fatal("Expected port to be 10 but found:", sampleConfig.DialTimeout)
+	}
+
 	if !sampleConfig.StripProxyHeaders {
 		t.Fatal("Expected sampleConfig.StripProxyHeaders to be true")
+	}
+
+	if sampleConfig.UseIncomingLocalAddr {
+		t.Fatal("Expected sampleConfig.UseIncomingLocalAddr to be false")
 	}
 
 	if !sampleConfig.AuthenticationRequired() {

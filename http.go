@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
 	"strings"
 )
@@ -39,7 +38,7 @@ func (hp *httpProxy) SetupOutgoing(connection *connection, request *http.Request
 	}
 
 	// Create our outgoing connection.
-	outgoingConn, err := net.Dial("tcp", host)
+	outgoingConn, err := connection.Dial("tcp", host)
 	if err != nil {
 		return errors.New(fmt.Sprint("Error making outgoing request to", request.Host, err))
 	}
