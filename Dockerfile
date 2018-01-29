@@ -3,4 +3,4 @@ ADD . /turbulence
 WORKDIR /turbulence
 ENV GOPATH /turbulence
 RUN go build
-ENTRYPOINT ["/bin/sh", "-c", "/turbulence/turbulence ${*}", "--"]
+ENTRYPOINT ["/turbulence/turbulence"]
