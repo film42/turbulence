@@ -1,4 +1,4 @@
-FROM golang:1.8.1-alpine
+FROM golang:1.11-alpine
 ADD . /turbulence
 WORKDIR /turbulence
 ENV GOPATH /turbulence
