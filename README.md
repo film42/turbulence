@@ -14,10 +14,16 @@ $ go get github.com/film42/turbulence
 $ ./bin/turbulence
 ```
 
-Or you can grab the pre-built docker container:
+Or you can grab the pre-built docker container with default options:
 
 ```
-$ docker run -p 26000:26000 -d film42/turbulence:latest --config test/config.json
+$ docker run -p 25000:25000 -d film42/turbulence:latest
+```
+
+Or use your own config:
+
+```
+$ docker run -p 26000:26000 -d -v $(pwd)/test:/config film42/turbulence:latest --config config/config.json
 ```
 
 ### Configuring

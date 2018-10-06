@@ -103,9 +103,9 @@ func (c *connection) Handle() {
 	logger.Info.Println(c.id, "Processing connection to:", request.Method, request.Host)
 
 	if request.Method == "CONNECT" {
-		c.proxy = &httpsProxy{}
+		c.proxy = new(httpsProxy)
 	} else {
-		c.proxy = &httpProxy{}
+		c.proxy = new(httpProxy)
 	}
 
 	err = c.proxy.SetupOutgoing(c, request)
